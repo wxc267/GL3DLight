@@ -293,11 +293,7 @@ var draw_type=2;
       			normal.push(r*Math.cos(angle)); 
       			normal.push(r*Math.sin(angle));
       			normal.push(0.0); 
-			/*
-      			colorVertex.push(color[0]*Math.cos(angle)); 
-      			colorVertex.push(color[1]*Math.sin(angle)); 
-      			colorVertex.push(color[2]*i*1.0/(number_stacks-1));	
-      			colorVertex.push(color[3]);*/
+
 			colorVertex=colorVertex.concat(color); 
     		}
 	}
@@ -662,7 +658,7 @@ function initPosition()
 	leftWheelBuffer=initCylinderBuffers(0.3, 0.3, 0.1, 20, 20, [0.5,0.25,0,1]);
 	rightWheelBuffer=initCylinderBuffers(0.3, 0.3, 0.1, 20, 20, [0.5,0.25,0,1]);
 	ammoBuffer=initSphereBuffers(0.13,50,50,[0.25,0.25,0.25,1]);
-	bigCreteBuffer=initCubeBuffers(0.5,[0.6,0.4,0,1]);
+	bigCreteBuffer=initCubeBuffers(0.3,[0.6,0.4,0,1]);
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
         canvas.addEventListener('mousedown', onDocumentMouseDown,false); 
@@ -734,21 +730,25 @@ var delta=0.5;
 function moveDown()
 {
 	u_y-=delta;
+	v_y-=delta;
 	drawScene();
 }
 function moveUp()
 {
 	u_y+=delta;
+	v_y+=delta;
 	drawScene();
 }
 function moveLeft()
 {
 	u_x-=delta;
+	v_x-=delta;
 	drawScene();
 }
 function moveRight()
 {
 	u_x+=delta;
+	v_x+=delta;
 	drawScene();
 }
 var d=0;

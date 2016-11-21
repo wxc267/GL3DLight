@@ -293,11 +293,7 @@ var draw_type=2;
       			normal.push(r*Math.cos(angle)); 
       			normal.push(r*Math.sin(angle));
       			normal.push(0.0); 
-			/*
-      			colorVertex.push(color[0]*Math.cos(angle)); 
-      			colorVertex.push(color[1]*Math.sin(angle)); 
-      			colorVertex.push(color[2]*i*1.0/(number_stacks-1));	
-      			colorVertex.push(color[3]);*/
+
 			colorVertex=colorVertex.concat(color); 
     		}
 	}
@@ -487,7 +483,7 @@ function initPosition()
 	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, normal.itemSize, gl.FLOAT, false, 0, 0);
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index); 
-
+	lightManagement();
 	setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader
 	setNMatrix();
 	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, position.numItems);	
@@ -500,7 +496,7 @@ function initPosition()
 
   function drawScene() {
 	
-	lightManagement();
+	
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	var cameraPosition=[u_x,u_y,u_z];
@@ -734,21 +730,25 @@ var delta=0.5;
 function moveDown()
 {
 	u_y-=delta;
+	v_y-=delta;
 	drawScene();
 }
 function moveUp()
 {
 	u_y+=delta;
+	v_y+=delta;
 	drawScene();
 }
 function moveLeft()
 {
 	u_x-=delta;
+	v_x-=delta;
 	drawScene();
 }
 function moveRight()
 {
 	u_x+=delta;
+	v_x+=delta;
 	drawScene();
 }
 var d=0;
