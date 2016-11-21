@@ -53,7 +53,7 @@ var draw_type=2;
     var crete2Buffer;
     var crete3Buffer;
     var crete4Buffer;
- 
+    var bigCreteBuffer;
     //wheel
     var leftWheelBuffer;
     var rightWheelBuffer;
@@ -375,7 +375,11 @@ var draw_type=2;
         gl.uniformMatrix4fv(shaderProgram.vMatrixUniform, false, vMatrix);
         gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
 	
-        gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
+        
+    }
+    function setNMatrix()
+    {
+	gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
     }
 
      function degToRad(degrees) {
@@ -412,43 +416,11 @@ var draw_type=2;
     }
 
 
-    function drawObject(buffer)
-    {
 
-	
-	mat4.identity(nMatrix); 
-	nMatrix = mat4.multiply(nMatrix, vMatrix);
-	nMatrix = mat4.multiply(nMatrix, mMatrix); 	
-	nMatrix = mat4.inverse(nMatrix);
-	nMatrix = mat4.transpose(nMatrix); 
-
-	lightManagement();
-	
-	var position=buffer[0];
-	var color=buffer[1];
-	var normal=buffer[2];
-	var index=buffer[3];
-	gl.bindBuffer(gl.ARRAY_BUFFER, position);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, position.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, color);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,color.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, normal);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, normal.itemSize, gl.FLOAT, false, 0, 0);
-
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index); 
-
-        setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader 
-
-	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, position.numItems);	
-        else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, position.numItems);
-	else if (draw_type==2) gl.drawElements(gl.TRIANGLES, index.numItems , gl.UNSIGNED_SHORT, 0); 
-    }
 
 
     var cylinderMatrix, cubeMatrix,sphereMatrix,crete1Matrix,crete2Matrix,crete3Matrix;
-    var	crete4Matrix,leftWheelMatrix,rightWheelMatrix,ammoMatrix;
+    var	crete4Matrix,leftWheelMatrix,rightWheelMatrix,ammoMatrix,bigCreteMatrix;
 
 function initPosition()
 {
@@ -463,7 +435,7 @@ function initPosition()
 	mat4.identity(crete3Matrix);
 	mat4.identity(crete4Matrix);
 	mat4.identity(ammoMatrix);
-	
+	mat4.identity(bigCreteMatrix);
 	cubeMatrix = mat4.translate(cubeMatrix, [0.35, 0.2, 0]);
 	cubeMatrix = mat4.scale(cubeMatrix,[0.1,0.1,0.4]);
 	sphereMatrix = mat4.translate(sphereMatrix, [0.8, 0.4, 0.05]);
@@ -485,9 +457,50 @@ function initPosition()
 	
 	
 	ammoMatrix=mat4.translate(ammoMatrix,[-0.3,0.1,0.3]);
+	bigCreteMatrix=mat4.translate(bigCreteMatrix,[0.5,0,0.5]);
 }
 
+
+    function drawObject(buffer)
+    {
+	
+	mat4.identity(nMatrix);
+	//nMatrix = mat4.multiply(nMatrix, vMatrix);
+	nMatrix = mat4.multiply(nMatrix, mMatrix); 	
+	nMatrix = mat4.inverse(nMatrix);
+	nMatrix = mat4.transpose(nMatrix); 
+
+	
+	
+		
+	var position=buffer[0];
+	var color=buffer[1];
+	var normal=buffer[2];
+	var index=buffer[3];
+	gl.bindBuffer(gl.ARRAY_BUFFER, position);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, position.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, color);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute,color.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, normal);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, normal.itemSize, gl.FLOAT, false, 0, 0);
+
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index); 
+
+	setMatrixUniforms();   // pass the modelview mattrix and projection matrix to the shader
+	setNMatrix();
+	if (draw_type ==1) gl.drawArrays(gl.LINE_LOOP, 0, position.numItems);	
+        else if (draw_type ==0) gl.drawArrays(gl.POINTS, 0, position.numItems);
+	else if (draw_type==2) gl.drawElements(gl.TRIANGLES, index.numItems , gl.UNSIGNED_SHORT, 0); 
+        
+    }
+
+
+
   function drawScene() {
+	
+	lightManagement();
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	var cameraPosition=[u_x,u_y,u_z];
@@ -498,11 +511,7 @@ function initPosition()
     	mat4.identity(mMatrix);
  	mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 0]);   // now set up the model matrix 
 
-
-
-
-	
-	for(var i=0;i<9;i++){
+	for(var i=0;i<10;i++){
 		PushMatrix(mMatrix);
 	}
 	//draw cube
@@ -540,7 +549,12 @@ function initPosition()
 	mMatrix=PopMatrix();
 	mMatrix=mat4.multiply(mMatrix,ammoMatrix);
 	drawObject(ammoBuffer); 
-		
+	//draw big crete
+	mMatrix=PopMatrix();
+	mMatrix=mat4.multiply(mMatrix,bigCreteMatrix);
+	drawObject(bigCreteBuffer); 
+
+	
     }
 
 
@@ -608,7 +622,7 @@ function initPosition()
      }
 
     ///////////////////////////////////////////////////////////////
-    var canvas
+    var canvas;
     function webGLStart() {
         canvas = document.getElementById("code03-canvas");
         initGL(canvas);
@@ -648,11 +662,12 @@ function initPosition()
 	leftWheelBuffer=initCylinderBuffers(0.3, 0.3, 0.1, 20, 20, [0.5,0.25,0,1]);
 	rightWheelBuffer=initCylinderBuffers(0.3, 0.3, 0.1, 20, 20, [0.5,0.25,0,1]);
 	ammoBuffer=initSphereBuffers(0.13,50,50,[0.25,0.25,0.25,1]);
-
+	bigCreteBuffer=initCubeBuffers(0.3,[0.6,0.4,0,1]);
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
         canvas.addEventListener('mousedown', onDocumentMouseDown,false); 
         canvas.addEventListener('contextmenu', onDocumentMouseDown, false);
+	document.addEventListener('keydown', onKeyDown, false);
 	pMatrix = mat4.perspective(60, 1.0, 0.1, 100, pMatrix);  // set up the projection matrix 
 
 	sphereMatrix=mat4.create();
@@ -665,10 +680,10 @@ function initPosition()
 	crete3Matrix=mat4.create();
 	crete4Matrix=mat4.create();
 	ammoMatrix=mat4.create();
+	bigCreteMatrix=mat4.create();
 
 
-
-	initPosition();
+	 initPosition();
         drawScene();
 }
 
@@ -686,6 +701,8 @@ function redraw() {
     n_x=0;
     n_y=1;
     n_z=0;
+    d=0;
+    pi=0;
     light_ambient = [0,0,0,1]; 
     light_diffuse = [.8,.8,.8,1];
     light_specular = [1.3,1.3,1.3,1]; 
@@ -717,29 +734,42 @@ var delta=0.5;
 function moveDown()
 {
 	u_y-=delta;
-	v_y-=delta;
 	drawScene();
 }
 function moveUp()
 {
 	u_y+=delta;
-	v_y+=delta;
 	drawScene();
 }
 function moveLeft()
 {
 	u_x-=delta;
-	v_x-=delta;
 	drawScene();
 }
 function moveRight()
 {
 	u_x+=delta;
-	v_x+=delta;
+	drawScene();
+}
+var d=0;
+function moveAroundHorizontal()
+{
+	var r=Math.pow(u_x*u_x+u_z*u_z,0.5);
+	d+=10;
+	u_x=r*Math.cos(degToRad(d));
+	u_z=r*Math.sin(degToRad(d));
+	drawScene();
+}
+var pi=0;
+function moveAroundVertical()
+{
+	var r=Math.pow(u_y*u_y+u_z*u_z,0.5);
+	pi+=10;
+	u_z=r*Math.cos(degToRad(-pi));
+	u_y=r*Math.sin(degToRad(pi));
 	drawScene();
 }
 //camera center of interest change
-
 function centerUp()
 {
 	v_y+=delta;
@@ -859,4 +889,61 @@ function specularLightDown()
 	if(light_specular[2]>0)
 		light_specular[2]-=0.1; 
 	drawScene();
+}
+//key control
+function onKeyDown(event)
+{
+	switch(event.keyCode)
+	{
+		case 119:
+		case 87:
+			lightForward();
+			break;
+		case 115:
+		case 83:
+			lightBackward();
+			break;
+		case 65:
+		case 97:
+			lightLeft();
+			break;
+		case 68:
+		case 100:
+			lightRight();
+			break;
+		case 81:
+		case 113:
+			lightUp();
+			break;
+		case 69:
+		case 101:
+			lightDown();
+			break;
+		case 49:
+			ambientLightUp();
+			break;
+		case 50:
+			ambientLightDown();
+			break;
+		case 51:
+			diffuseLightUp();
+			break;
+		case 52:
+			diffuseLightDown();
+			break;		
+		case 53:
+			specularLightUp();
+			break;	
+		case 54:
+			specularLightDown();
+			break;
+		case 82:
+		case 114:
+			moveAroundHorizontal();
+			break;	
+		case 70:
+		case 102:
+			moveAroundVertical();
+			break;
+	}
 }
