@@ -46,6 +46,6 @@ How to run program:
 2. The model, camera and light system are controlled by html button.
 
 Develop Environment:
-OS: Ubuntu
+OS: Ubuntu, IOS
 Browser: Firefox
 
