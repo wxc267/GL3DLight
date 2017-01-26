@@ -23,7 +23,7 @@ var draw_type=2;
             alert("Could not initialise WebGL, sorry :-(");
         }
     }
-
+    ///push
     var mvMatrixStack = [];
 
     function PushMatrix(matrix) {
